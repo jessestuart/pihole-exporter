@@ -1,5 +1,5 @@
 ARG target
-FROM $target/golang:1.11-alpine as builder
+FROM $target/golang:1.13-alpine as builder
 
 WORKDIR /go/src/github.com/eko/pihole-exporter
 COPY . .
@@ -7,14 +7,12 @@ COPY qemu-* /usr/bin/
 
 ARG goarch
 RUN apk update && \
-    apk --no-cache add git alpine-sdk gcc libc-dev
-    # upx
+    apk --upgrade --no-cache add git alpine-sdk gcc libc-dev
 
 RUN GO111MODULE=on go mod vendor
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=$goarch go build -ldflags '-s -w' -o binary ./
-# RUN upx -f --brute binary
 
-FROM $target/alpine:3.10
+FROM $target/alpine
 
 LABEL name="pihole-exporter"
 LABEL maintainer="Jesse Stuart <hi@jessestuart.com>"
